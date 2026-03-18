@@ -12,7 +12,7 @@ test('redirect endpoint returns a json url pointing to google', function (): voi
     expect($response->json('url'))->toContain('accounts.google.com');
 });
 
-test('callback creates a new user and returns a token', function (): void {
+test('callback creates a new user and redirects to nativephp scheme with token', function (): void {
     $socialiteUser = (new SocialiteUser)->map([
         'id' => 'google-abc123',
         'name' => 'Jane Doe',
@@ -22,9 +22,10 @@ test('callback creates a new user and returns a token', function (): void {
 
     Socialite::shouldReceive('driver->stateless->user')->andReturn($socialiteUser);
 
-    $this->getJson('/api/v1/auth/google/callback')
-        ->assertSuccessful()
-        ->assertJsonStructure(['token']);
+    $response = $this->get('/api/v1/auth/google/callback')
+        ->assertRedirect();
+
+    expect($response->headers->get('Location'))->toStartWith('nativephp://127.0.0.1/auth/callback?token=');
 
     $this->assertDatabaseHas('users', [
         'google_id' => 'google-abc123',
@@ -32,7 +33,7 @@ test('callback creates a new user and returns a token', function (): void {
     ]);
 });
 
-test('callback finds existing user by google_id and returns token without creating a duplicate', function (): void {
+test('callback finds existing user by google_id and redirects with token without creating a duplicate', function (): void {
     User::factory()->create([
         'google_id' => 'google-abc123',
         'email' => 'jane@example.com',
@@ -47,17 +48,20 @@ test('callback finds existing user by google_id and returns token without creati
 
     Socialite::shouldReceive('driver->stateless->user')->andReturn($socialiteUser);
 
-    $this->getJson('/api/v1/auth/google/callback')
-        ->assertSuccessful()
-        ->assertJsonStructure(['token']);
+    $response = $this->get('/api/v1/auth/google/callback')
+        ->assertRedirect();
+
+    expect($response->headers->get('Location'))->toStartWith('nativephp://127.0.0.1/auth/callback?token=');
 
     expect(User::count())->toBe(1);
 });
 
-test('callback returns 422 when google throws an exception', function (): void {
+test('callback redirects to nativephp scheme with error when google throws an exception', function (): void {
     Socialite::shouldReceive('driver->stateless->user')->andThrow(new Exception('Invalid state'));
 
-    $this->getJson('/api/v1/auth/google/callback')
-        ->assertUnprocessable()
-        ->assertJson(['message' => 'Invalid Google credentials']);
+    $response = $this->get('/api/v1/auth/google/callback')
+        ->assertRedirect();
+
+    expect($response->headers->get('Location'))
+        ->toBe('nativephp://127.0.0.1/auth/callback?error=1&message='.urlencode('Google login failed'));
 });
