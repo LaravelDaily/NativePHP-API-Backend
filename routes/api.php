@@ -21,11 +21,16 @@ Route::prefix('v1')->group(function (): void {
         });
 
         Route::get('mobile-callback', function (Request $request): Response {
-            $scheme = $request->filled('error')
-                ? 'nativephp://auth/callback?error=1&message='.urlencode($request->query('message', 'Google login failed'))
-                : 'nativephp://auth/callback?token='.urlencode($request->query('token', ''));
+            $path = $request->filled('error')
+                ? 'auth/callback?error=1&message='.urlencode($request->query('message', 'Google login failed'))
+                : 'auth/callback?token='.urlencode($request->query('token', ''));
 
-            return response('<html><head><script>window.location.href='.json_encode($scheme).';</script></head><body></body></html>')
+            // Use Android intent:// URL — Chrome Custom Tabs explicitly supports this format
+            // and will fire the Android Intent to open the app, unlike nativephp:// scheme
+            // which Chrome blocks when navigated via JavaScript.
+            $intentUrl = 'intent://'.$path.'#Intent;scheme=nativephp;package=com.quiz.myapp;end';
+
+            return response('<html><head><meta http-equiv="refresh" content="0;url='.htmlspecialchars($intentUrl, ENT_QUOTES).'"></head><body></body></html>')
                 ->header('Content-Type', 'text/html');
         })->name('api.v1.auth.mobile-callback');
     });
