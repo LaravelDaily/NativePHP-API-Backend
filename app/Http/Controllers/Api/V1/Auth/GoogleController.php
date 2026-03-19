@@ -22,7 +22,7 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Exception $e) {
-            return redirect('/api/v1/auth/mobile-callback?error=1&message='.urlencode('Google login failed'));
+            return redirect('nativephp://auth/callback?error=1&message='.urlencode('Google login failed'));
         }
 
         $user = User::updateOrCreate(
@@ -36,6 +36,6 @@ class GoogleController extends Controller
 
         $token = $user->createToken('google')->plainTextToken;
 
-        return redirect('/api/v1/auth/mobile-callback?token='.$token);
+        return redirect('nativephp://auth/callback?token='.$token);
     }
 }
