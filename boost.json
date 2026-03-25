@@ -9,7 +9,9 @@
     "nightwatch_mcp": false,
     "sail": false,
     "skills": [
+        "laravel-best-practices",
         "socialite-development",
-        "pest-testing"
+        "pest-testing",
+        "tailwindcss-development"
     ]
 }
