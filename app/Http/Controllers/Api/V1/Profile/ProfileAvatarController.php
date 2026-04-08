@@ -11,7 +11,7 @@ class ProfileAvatarController extends Controller
     public function store(Request $request): Response
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpeg', 'max:5120'],
+            'avatar' => ['required', 'image', 'mimes:jpeg', 'max:2048'],
         ]);
 
         $path = $request->file('avatar')->storeAs(
