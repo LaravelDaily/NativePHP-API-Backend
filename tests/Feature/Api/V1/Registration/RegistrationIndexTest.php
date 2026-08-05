@@ -2,22 +2,7 @@
 
 use App\Models\Registration;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
-
-beforeEach(function (): void {
-    if (Schema::hasTable('registrations')) {
-        return;
-    }
-
-    Schema::create('registrations', function (Blueprint $table): void {
-        $table->id();
-        $table->string('name');
-        $table->string('email');
-        $table->timestamps();
-    });
-});
 
 test('unauthenticated request returns 401', function (): void {
     $this->getJson('/api/v1/auth/registrations')->assertUnauthorized();

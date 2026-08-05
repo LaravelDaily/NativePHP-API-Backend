@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\GoogleController;
 use App\Http\Controllers\Api\V1\Cuesheet\CuesheetController;
+use App\Http\Controllers\Api\V1\Notification\NotificationController;
 use App\Http\Controllers\Api\V1\Profile\ProfileAvatarController;
 use App\Http\Controllers\Api\V1\Registration\RegistrationController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,7 @@ Route::prefix('v1')->group(function (): void {
             Route::post('logout', [AuthController::class, 'logout'])->name('api.v1.auth.logout');
             Route::get('cuesheets', [CuesheetController::class, 'index'])->name('api.v1.cuesheets.index');
             Route::get('registrations', [RegistrationController::class, 'index'])->name('api.v1.registrations.index');
+            Route::post('notifications', [NotificationController::class, 'store'])->name('api.v1.notifications.store');
         });
 
         Route::prefix('google')->group(function (): void {
